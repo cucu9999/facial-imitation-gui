@@ -143,7 +143,7 @@ if __name__ == '__main__':
                     if lm is not None and bs is not None and rm is not None:
                         rpy = headpose.pose_det(rm=rm)
 
-                        facemeshdetector.visualize_results()
+                        # facemeshdetector.visualize_results()
                         temp_servos = Servos()
                         servos = handle_data(servo_flag, bs, rpy, temp_servos)
                         if count == 0:
@@ -163,11 +163,13 @@ if __name__ == '__main__':
                     print("move too fast")
                     servosCtrl.plan_and_pub(zeroServos,headCtrl=headCtrl,mouthCtrl=mouthCtrl, cycles=1)
             t2 = time.time()
+            print(f"帧率为{1/(t2-t1)}")
 
     except Exception as e:
         print("错误：",e)
 
     finally:
         servosCtrl.plan_and_pub(zeroServos,headCtrl=headCtrl,mouthCtrl=mouthCtrl,cycles=1)
+        print("----------------end---------------")
         cap.release()
     
