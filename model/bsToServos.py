@@ -33,13 +33,6 @@ def bs2head_mouth(bs, rpy_angles, servos):
     r_blink = bs[10]
     r_eye_wide = bs[22]
 
-    brow_up = bs[3]
-    l_brow_in = bs[1]
-    r_brow_in = bs[2]
-    brow_up_left = bs[17]
-    brow_up_right = bs[18]
-    brow_down_left = bs[11]
-    brow_down_right = bs[12]
 
     l_eye_out = bs[15]          # eye_look_out_left
     l_eye_in = bs[13]           # eye_look_in_left
@@ -51,6 +44,16 @@ def bs2head_mouth(bs, rpy_angles, servos):
     r_eye_up = bs[18]    # EyeLookUpRight
     r_eye_down = bs[12]  # EyeLookDownRight
 
+    brow_up = bs[3]
+
+    l_brow_in = bs[1]
+    r_brow_in = bs[2]
+
+    brow_up_left = bs[17]
+    brow_up_right = bs[18]
+    brow_down_left = bs[11]
+    brow_down_right = bs[12]
+
 
     
     
@@ -61,60 +64,47 @@ def bs2head_mouth(bs, rpy_angles, servos):
     
     servos.left_eye_level[0] = map_range(1.3*(l_eye_out - l_eye_in), -1, 1 , 0 , 1)
     servos.right_eye_level[0] = map_range(1.3*(r_eye_in - r_eye_out), -1, 1, 0, 1)
-    servos.left_eye_erect[0] = map_range(1.3*(l_eye_down - l_eye_up), -1, 1, 0, 1)
-    servos.right_eye_erect[0] = map_range(1.3*(r_eye_down - r_eye_up), -1, 1, 0, 1)
+    servos.left_eye_erect[0] = map_range(1.3*(l_eye_down - l_eye_up), -1, 1, 1, 0) # pad --> 0-1
+    servos.right_eye_erect[0] = map_range(1.3*(r_eye_down - r_eye_up), -1, 1, 1, 0) # pad --> 0-1
     
 
-
-
-
-
-
-    servos.left_eyebrow_erect[0] = 0 # map_range(brow_up, 0, 0.2, 0.01, 0.99)
-    servos.right_eyebrow_erect[0] = 0 # map_range(brow_up, 0, 0.2, 0.01, 0.99)
-
+    servos.left_eyebrow_erect[0] = map_range(brow_up, 0, 1, 0.01, 0.99)
+    servos.right_eyebrow_erect[0] = map_range(brow_up, 0, 1, 0.01, 0.99)
     
-    servos.left_eyebrow_level[0] = 0 # map_range(l_brow_in, 0, 1, 0.2, 1)
-    servos.right_eyebrow_level[0] = 0 # map_range(r_brow_in, 0, 1, 1, 0.2)
-
-    servos.head_dian[0] = 0.5
-    servos.head_yao[0] = 0.5 # 0.5 + HeadYaw
-    servos.head_bai[0] = 0.5  # 0.5 - HeadRoll
-    # servos.head_dian[0] = map_range(1.5 * rpy_angles[0], -45, 45, 0.9, 0.1)  # 0.5 + HeadPitch
-    # servos.head_yao[0] = map_range(1.5 * rpy_angles[1], -45, 45, 0.1, 0.9)  # 0.5 + HeadYaw
-    # servos.head_bai[0] = map_range(1.5 * rpy_angles[2], -45, 45, 0.9, 0.1)  # 0.5 - HeadRoll
+    servos.left_eyebrow_level[0] = map_range(l_brow_in, 0, 1, 0.2, 1)
+    servos.right_eyebrow_level[0] = map_range(r_brow_in, 0, 1, 1, 0.2) 
 
 
-    # ================ mouth control ==================
-    JawOpen = bs[25]  # JawOpen
+
+    # print("--------------------",rpy_angles[2],rpy_angles[0],rpy_angles[1])
+    servos.head_bai[0] = map_range(1.5 * rpy_angles[2], -45, 45,  0, 1)      # 左摆[-45,45]
+    servos.head_dian[0] = map_range(1.5 * rpy_angles[0], -45, 45, 1, 0)    # 抬头[-45,45]
+    servos.head_yao[0] = map_range(1.5 * rpy_angles[1], -45, 45,1, 0)      # 右摇[-45,45]
+
+
+
+    # -----------------------------------------------------------------
+    JawOpen = bs[25]
     JawLeft = bs[24]
     JawRight = bs[26]
     JawForward = bs[23]*100
-    # print("JawForward",JawForward)
 
 
-    # --------------------------------
     servos.jawOpenLeft[0]  = map_range(JawOpen, 0, 1, 0, 1)
     servos.jawOpenRight[0] = map_range(JawOpen, 0, 1, 0, 1)
 
-
-    # if JawLeft > 0.15 or JawRight > 0.15:
-    #     servos.jawBackLeft  = map_range(JawLeft, 0, 0.15, 0.5, 0)  + map_range(JawRight, 0, 0.15, 0.5, 1)
-    #     servos.jawBackRight = map_range(JawLeft, 0, 0.15, 0.5, 1)  + map_range(JawRight, 0, 0.15, 0.5, 0)
 
     if JawForward >0.15:
         servos.jawBackLeft[0]  = map_range(JawForward, 0, 0.3, 0.4, 0.9)
         servos.jawBackRight[0] = map_range(JawForward, 0, 0.3, 0.4, 0.9)
     else:
-        # print("JawLeft",JawLeft)
-        # print("JawRight",JawRight)
+
         if JawRight > 0.2:
             servos.jawBackLeft[0]  = map_range(JawRight, 0, 1, 0.5, 0)
             servos.jawBackRight[0] = map_range(JawRight, 0, 1, 0.5, 1)
             jawBackLeft1  = map_range(JawLeft, 0, 1, 0.5, 0)
             jawBackRight1 = map_range(JawLeft, 0, 1, 0.5, 1)
-            # print("servos.jawBackLeft",jawBackLeft1)
-            # print("servos.jawBackLeft",jawBackRight1)
+
         else:
             servos.jawBackLeft[0]  = map_range(JawLeft, 0, 1, 0.5, 1)
             servos.jawBackRight[0] = map_range(JawLeft, 0, 1, 0.5, 0)
@@ -135,15 +125,16 @@ def bs2head_mouth(bs, rpy_angles, servos):
 
 
 
-    mouth_UpperUpLeft     = bs[48]
-    mouth_UpperUpRight    = bs[49]
-    mouth_LowerDownLeft   = bs[34]
-    mouth_LowerDownRight  = bs[35]
+    mouth_UpperUpLeft     = bs[48] # mouth_UpperUpLeft
+    mouth_UpperUpRight    = bs[49] # mouth_UpperUpRight
+    mouth_LowerDownLeft   = bs[34] # mouth_LowerDownLeft
+    mouth_LowerDownRight  = bs[35] # mouth_LowerDownRight
 
     servos.mouthUpperUpLeft[0]     = mouth_UpperUpLeft
     servos.mouthUpperUpRight [0]   = mouth_UpperUpRight
     servos.mouthLowerDownLeft[0]   = mouth_LowerDownLeft
     servos.mouthLowerDownRight[0]  = mouth_LowerDownRight
+
 
 # ----------------------------------------------------------------------------------------------------------------------------
     MouthLeft = bs[33]  # MouthLeft
@@ -153,28 +144,38 @@ def bs2head_mouth(bs, rpy_angles, servos):
     MouthFrownLeft = bs[30]  # MouthFrownLeft
     MouthFrownRight = bs[31]  # MouthFrownRight
 
+
+    MouthFunnel         = bs[32]
+    MouthPucker         = bs[38]
+    MouthUpperUpLeft     = bs[48] # mouth_UpperUpLeft
+    MouthUpperUpRight    = bs[49] # mouth_UpperUpRight
+    MouthLowerDownLeft   = bs[34] # mouth_LowerDownLeft
+    MouthLowerDownRight  = bs[35] # mouth_LowerDownRight
+
+    mouth_UpperUpLeft    = 1 - (JawOpen*0.5 + MouthFunnel*0.3 + MouthUpperUpLeft*0.2)
+    mouth_UpperUpRight   = 1 - (JawOpen*0.5 + MouthFunnel*0.3 + MouthUpperUpRight*0.2)
+    mouth_LowerDownLeft  = JawOpen*0.5 + MouthPucker*0.1 + MouthLowerDownLeft*0.2
+    mouth_LowerDownRight = JawOpen*0.5 + MouthPucker*0.1 + MouthLowerDownRight*0.2
+
+
+
     mouth_CornerLx = (MouthLeft*0.8 + MouthRight*0.2 + JawOpen)
     mouth_CornerLy = MouthSmileLeft*0.5 + 0.5*(1 - MouthFrownLeft*2)
     mouth_CornerRx = (MouthLeft*0.2 + MouthRight*0.8 + JawOpen)
     mouth_CornerRy = MouthSmileRight*0.5 + 0.5*(1- MouthFrownRight*2)
 
-    # print(mouth_CornerLx, mouth_CornerLy, mouth_CornerRx, mouth_CornerRy)
-
     mouth_CornerLy = 1 - mouth_CornerLy
     # mouth_CornerRx = 1 - mouth_CornerRx
-    servos.mouthCornerUpLeft[0]    =  mouth_CornerLx + mouth_CornerLy
-    servos.mouthCornerUpRight[0]   = -mouth_CornerRx + mouth_CornerRy
-    servos.mouthCornerDownLeft[0]  = -mouth_CornerLx + mouth_CornerLy
-    servos.mouthCornerDownRight[0] =  mouth_CornerRx + mouth_CornerRy
 
 
-    # try:
-    #     servos.send()
-    #     servos.send()
-    # except:
-    #     print("error write")
-    #     servos.close()
-    #     servos.close()
+
+    servos.mouthCornerUpLeft[0]    = 0.5#  mouth_CornerLx + mouth_CornerLy
+    servos.mouthCornerUpRight[0]   = 0.5# -mouth_CornerRx + mouth_CornerRy
+    servos.mouthCornerDownLeft[0]  = 0.5# -mouth_CornerLx + mouth_CornerLy
+    servos.mouthCornerDownRight[0] =  0.5#  mouth_CornerRx + mouth_CornerRy
+
+
+
     return servos
  
 
