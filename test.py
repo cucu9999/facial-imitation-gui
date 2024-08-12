@@ -109,10 +109,10 @@ if __name__ == '__main__':
                     servos = handle_data(servo_flag, bs, rpy, temp_servos)
                     if count == 0:
                         servos.head_steps(20)
-                    else:
-                        count = count + 1
+                        count += 1
+                        # pass
+                    elif count == 1:
                         servos.head_steps(1)
-
                     servosCtrl.plan_and_pub(servos, headCtrl, mouthCtrl, cycles=1)
 
                 else:
