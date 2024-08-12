@@ -37,7 +37,7 @@ class FacePoseDetector:
                 )
 
                 # print(delta_pose)
-                if delta_pose > 30:
+                if delta_pose > 15:
                     self.past_pose = cur_pose
                     print("Move too fast!!!!!")  # 判断是否移动过快
                     return False
