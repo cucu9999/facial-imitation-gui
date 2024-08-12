@@ -28,53 +28,61 @@ def map_range(x, from_min, from_max, to_min, to_max):
 
 # BS数据驱动
 def bs2head_mouth(bs, rpy_angles, servos):
-    l_blink =bs[9]
-    l_eye_wide =bs[21]
-    r_blink =bs[10]
+    l_blink = bs[9]
+    l_eye_wide = bs[21]
+    r_blink = bs[10]
     r_eye_wide = bs[22]
-    brow_up =bs[3]
-    l_brow_in =bs[1]
+
+    brow_up = bs[3]
+    l_brow_in = bs[1]
     r_brow_in = bs[2]
     brow_up_left = bs[17]
     brow_up_right = bs[18]
     brow_down_left = bs[11]
     brow_down_right = bs[12]
-    eye_look_out_left = bs[15]
-    eye_look_out_right = bs[16]
-    eye_look_in_left = bs[13]
-    eye_look_in_right = bs[14]
-    # print("brow_up",brow_up)
-    # ============== head control ================
-    # headCtrl.left_blink = 0.9*map_range(l_blink, 0, 0.7, 0.5, 0)
-    # headCtrl.right_blink = 0.9*map_range(r_blink, 0, 0.7, 0.3, 0)
+
+    l_eye_out = bs[15]          # eye_look_out_left
+    l_eye_in = bs[13]           # eye_look_in_left
+    l_eye_up = bs[17]             # EyeLookUpLeft
+    l_eye_down = bs[11]           # EyeLookDownLeft
+
+    r_eye_out = bs[16] # eye_look_out_right
+    r_eye_in = bs[14]  # eye_look_in_right
+    r_eye_up = bs[18]    # EyeLookUpRight
+    r_eye_down = bs[12]  # EyeLookDownRight
 
 
-    ################眼睛闭合太多左右眼睛会因为眉毛的拉伸而导致眼皮闭合不一致，尽量0.3以上####################
-    servos.left_blink[0] = map_range(l_blink, 0, 0.8, 0.3, 0) # + 0.1*map_range(l_eye_wide, 0, 1, 0.56, 1)
+    
+    
+    
+    servos.left_blink[0] = 0.8*map_range(l_blink, 0, 0.8, 0.56, 0) + 0.2*map_range(l_eye_wide, 0, 1, 0.56, 1)
+    servos.right_blink[0] = 0.8*map_range(r_blink, 0, 0.8, 0.56, 0) + 0.2*map_range(r_eye_wide, 0, 1, 0.56, 1)
 
-    servos.right_blink[0] = map_range(r_blink, 0, 0.5, 0.3, 0) # + 0.1*map_range(r_eye_wide, 0, 1, 0.56, 1)
-
-    servos.left_eye_erect[0] = 0.5 +0.4*(brow_down_left-brow_up_left)# 左眼竖 上 [0.01 - 0.50 - 0.99] 下
-    servos.left_eye_level[0] = 0.5 +0.4*(eye_look_out_left-eye_look_in_left) # 左眼平 内 [0.01 - 0.50 - 0.99] 外
-    servos.right_eye_erect[0] = 0.5 + 0.4*(brow_up_right-brow_down_right)# 右眼竖 下 [0.01 - 0.50 - 0.99] 上
-    servos.right_eye_level[0] = 0.5 +0.4*(eye_look_in_right-eye_look_out_right) # 右眼平 外 [0.01 - 0.50 - 0.99] 眼左
+    
+    servos.left_eye_level[0] = map_range(1.3*(l_eye_out - l_eye_in), -1, 1 , 0 , 1)
+    servos.right_eye_level[0] = map_range(1.3*(r_eye_in - r_eye_out), -1, 1, 0, 1)
+    servos.left_eye_erect[0] = map_range(1.3*(l_eye_down - l_eye_up), -1, 1, 0, 1)
+    servos.right_eye_erect[0] = map_range(1.3*(r_eye_down - r_eye_up), -1, 1, 0, 1)
     
 
 
 
-    servos.left_eyebrow_erect[0] = map_range(brow_up, 0, 0.2, 0.01, 0.99)
-    servos.right_eyebrow_erect[0] = map_range(brow_up, 0, 0.2, 0.01, 0.99)
+
+
+
+    servos.left_eyebrow_erect[0] = 0 # map_range(brow_up, 0, 0.2, 0.01, 0.99)
+    servos.right_eyebrow_erect[0] = 0 # map_range(brow_up, 0, 0.2, 0.01, 0.99)
 
     
-    servos.left_eyebrow_level[0] = map_range(l_brow_in, 0, 1, 0.2, 1)
-    servos.right_eyebrow_level[0] = map_range(r_brow_in, 0, 1, 1, 0.2)
+    servos.left_eyebrow_level[0] = 0 # map_range(l_brow_in, 0, 1, 0.2, 1)
+    servos.right_eyebrow_level[0] = 0 # map_range(r_brow_in, 0, 1, 1, 0.2)
 
-    # servos.head_dian = 0.5
-    # servos.head_yao = 0.5 # 0.5 + HeadYaw
-    # servos.head_bai = 0.5  # 0.5 - HeadRoll
-    servos.head_dian[0] = map_range(1.5 * rpy_angles[0], -45, 45, 0.9, 0.1)  # 0.5 + HeadPitch
-    servos.head_yao[0] = map_range(1.5 * rpy_angles[1], -45, 45, 0.1, 0.9)  # 0.5 + HeadYaw
-    servos.head_bai[0] = map_range(1.5 * rpy_angles[2], -45, 45, 0.9, 0.1)  # 0.5 - HeadRoll
+    servos.head_dian[0] = 0.5
+    servos.head_yao[0] = 0.5 # 0.5 + HeadYaw
+    servos.head_bai[0] = 0.5  # 0.5 - HeadRoll
+    # servos.head_dian[0] = map_range(1.5 * rpy_angles[0], -45, 45, 0.9, 0.1)  # 0.5 + HeadPitch
+    # servos.head_yao[0] = map_range(1.5 * rpy_angles[1], -45, 45, 0.1, 0.9)  # 0.5 + HeadYaw
+    # servos.head_bai[0] = map_range(1.5 * rpy_angles[2], -45, 45, 0.9, 0.1)  # 0.5 - HeadRoll
 
 
     # ================ mouth control ==================
@@ -82,7 +90,7 @@ def bs2head_mouth(bs, rpy_angles, servos):
     JawLeft = bs[24]
     JawRight = bs[26]
     JawForward = bs[23]*100
-    print("JawForward",JawForward)
+    # print("JawForward",JawForward)
 
 
     # --------------------------------
@@ -98,15 +106,15 @@ def bs2head_mouth(bs, rpy_angles, servos):
         servos.jawBackLeft[0]  = map_range(JawForward, 0, 0.3, 0.4, 0.9)
         servos.jawBackRight[0] = map_range(JawForward, 0, 0.3, 0.4, 0.9)
     else:
-        print("JawLeft",JawLeft)
-        print("JawRight",JawRight)
+        # print("JawLeft",JawLeft)
+        # print("JawRight",JawRight)
         if JawRight > 0.2:
             servos.jawBackLeft[0]  = map_range(JawRight, 0, 1, 0.5, 0)
             servos.jawBackRight[0] = map_range(JawRight, 0, 1, 0.5, 1)
             jawBackLeft1  = map_range(JawLeft, 0, 1, 0.5, 0)
             jawBackRight1 = map_range(JawLeft, 0, 1, 0.5, 1)
-            print("servos.jawBackLeft",jawBackLeft1)
-            print("servos.jawBackLeft",jawBackRight1)
+            # print("servos.jawBackLeft",jawBackLeft1)
+            # print("servos.jawBackLeft",jawBackRight1)
         else:
             servos.jawBackLeft[0]  = map_range(JawLeft, 0, 1, 0.5, 1)
             servos.jawBackRight[0] = map_range(JawLeft, 0, 1, 0.5, 0)

@@ -9,7 +9,7 @@ class SetCamera:
         self.cap = None
         self.cameraIdx = cameraIdx
         self.cap = cv2.VideoCapture(self.cameraIdx)
-        self.frame_width, self.frame_height, self.fps = 640, 480, 10
+        self.frame_width, self.frame_height, self.fps = 640, 480, 30
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
         self.cap.set(cv2.CAP_PROP_FPS, self.fps)
