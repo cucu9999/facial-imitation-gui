@@ -5,7 +5,7 @@ from mediapipe.tasks import python as mp_python
 import time
 import numpy as np
 from scipy.spatial.transform import Rotation
-from utils.setCamera import SetCamera
+from .setCamera import SetCamera
 
 
 class FaceMeshDetector:
@@ -39,10 +39,16 @@ class FaceMeshDetector:
             self.landmarks = [landmark_pb2.NormalizedLandmark(
                 x=landmark.x, y=landmark.y, z=landmark.z) 
                 for landmark in mp_result.face_landmarks[0]]
+        else:
+            self.landmarks = None
         if mp_result.face_blendshapes:
             self.blendshapes = [b.score for b in mp_result.face_blendshapes[0]]
+        else:
+            self.blendshapes = None
         if mp_result.facial_transformation_matrixes:
             self.rotation_matrix = mp_result.facial_transformation_matrixes[0]
+        else:
+            self.rotation_matrix = None
 
     def get_results(self):
         if self.landmarks is not None and self.blendshapes is not None and self.rotation_matrix is not None:

@@ -24,6 +24,9 @@ class SetCamera:
             self.cap.set(cv2.CAP_PROP_FPS, self.fps)
         else:
             pass
+        return True
+
+    def read(self):
         success, image = self.cap.read()
         if not success:
             print("Ignoring empty camera frame.")
