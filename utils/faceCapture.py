@@ -94,8 +94,9 @@ class FaceMeshDetector:
             connection_drawing_spec=mp.solutions.drawing_styles.get_default_face_mesh_iris_connections_style()
         )
         annotated_image = cv2.flip(annotated_image, 1)
-        cv2.imshow("Camera", annotated_image)
-        cv2.waitKey(1)
+        # cv2.imshow("Camera", annotated_image)
+        # cv2.waitKey(1)
+        return annotated_image
 
 
 # ==========================================================================

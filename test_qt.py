@@ -55,15 +55,15 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
             self.port_head = '/dev/ttyACM1'
             self.port_mouth = '/dev/ttyACM0'
         elif self.os_type == "Windows":
-            self.port_head = 'COM10'
-            self.port_mouth = 'COM9'
+            self.port_head = 'COM8'
+            self.port_mouth = 'COM7'
         else:
             print("Unsupported OS, Please check your PC system")
         ################################# WWWWWWWWWWWWWWWWWWWWW
 
         ################################# MMMMMMMMMMMMMMMMMMMMM摄像头设置
         # self.cap = cv2.VideoCapture(2)
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(2)
 
         self.zeroServos = Servos()
         self.zeroServos.head_steps(50)
@@ -159,7 +159,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                                         # cv2.imshow("Camera", facemeshdetector.visualize_return())               ##### cv2显示人脸
                                         # cv2.waitKey(1)
                                         ################################# MMMMMMMMMMMMMMMMMMMMM 显示到界面
-                                        img_detect = self.facemeshdetector.visualize_return()
+                                        img_detect = self.facemeshdetector.visualize_results()
                                         img_detect = cv2.cvtColor(img_detect, cv2.COLOR_BGR2RGB)
                                         # # 使用cv2.resize进行降采样     self.label_video_origin.size().width()  361          self.label_video_origin.size().height()
                                         img_detect = cv2.resize(img_detect, (self.label_video_detect.size().width(),  self.label_video_detect.size().height()), interpolation=cv2.INTER_LINEAR)
@@ -185,32 +185,32 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                                         count = 0
                                         # print("move too fast")
                                         self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\tmove too fast\n')
-
+                                        self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
                                         self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl, cycles=1)
 
                                 else:
                                     count = 0
                                     # print("head not found")
                                     self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\thead not found\n')
-
+                                    self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
                                     self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl,cycles=1)
                             
                         t2 = time.time()
                         print(f"帧率为{1/(t2-t1)}")
-                        self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t'+f"帧率为{1/(t2-t1)}\n")
-                        self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
+                        # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t'+f"帧率为{1/(t2-t1)}\n")
+                        # self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
 
 
                     else :
-                        # print('关闭状态')
-                        self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t关闭状态\n')
-                        self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
+                        print('关闭状态')
+                        # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t关闭状态\n')
+                        # self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
 
                         time.sleep(0.08)            # pyqt 发送过快会崩溃
 
             except Exception as e:
-                # print("错误：",e)
-                self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t错误\n')
+                print("错误：",e)
+                # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t错误\n')
 
 
             finally:
