@@ -52,12 +52,12 @@ if __name__ == '__main__':
         port_head = '/dev/ttyACM1'
         port_mouth = '/dev/ttyACM0'
     elif os_type == "Windows":
-        port_head = 'COM10'
-        port_mouth = 'COM9'
+        port_head = 'COM8'
+        port_mouth = 'COM7'
     else:
         print("Unsupported OS, Please check your PC system")
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
     zeroServos = Servos()
     zeroServos.head_steps(50)
     servosCtrl = Servos_Ctrl()
@@ -143,7 +143,7 @@ if __name__ == '__main__':
                     if fp.process_frame(masked_image):
                         rpy = headpose.pose_det(rm=rm)
 
-                        # facemeshdetector.visualize_results()
+                        facemeshdetector.visualize_results(qt_flag=False)
                         temp_servos = Servos()
                         servos = handle_data(servo_flag, bs, rpy, temp_servos)
                         if count == 0:

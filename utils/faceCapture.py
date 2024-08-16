@@ -66,7 +66,7 @@ class FaceMeshDetector:
         else:
             return None, None, None
 
-    def visualize_results(self):
+    def visualize_results(self,qt_flag):
         if not self.frame_flag:
             return
         annotated_image = np.copy(self.frame)
@@ -94,9 +94,11 @@ class FaceMeshDetector:
             connection_drawing_spec=mp.solutions.drawing_styles.get_default_face_mesh_iris_connections_style()
         )
         annotated_image = cv2.flip(annotated_image, 1)
-        # cv2.imshow("Camera", annotated_image)
-        # cv2.waitKey(1)
-        return annotated_image
+        if qt_flag:
+            return annotated_image
+        else:
+            cv2.imshow("Camera", annotated_image)
+            cv2.waitKey(1)
 
 
 # ==========================================================================

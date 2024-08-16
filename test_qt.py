@@ -99,19 +99,19 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
 
         if ret:
             # try :
-                # 将 BGR 格式转换为 RGB 格式
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # 将 BGR 格式转换为 RGB 格式
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                # # 使用cv2.resize进行降采样            
-                frame = cv2.resize(frame, (self.label_video_origin.size().width(),  self.label_video_origin.size().height()), interpolation=cv2.INTER_LINEAR)
+            # # 使用cv2.resize进行降采样            
+            frame = cv2.resize(frame, (self.label_video_origin.size().width(),  self.label_video_origin.size().height()), interpolation=cv2.INTER_LINEAR)
 
-                # 获取图像大小并创建 QImage
-                h, w, ch = frame.shape
-                bytes_per_line = ch * w         # h,w    (480, 640)
-                qimg = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            # 获取图像大小并创建 QImage
+            h, w, ch = frame.shape
+            bytes_per_line = ch * w         # h,w    (480, 640)
+            qimg = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
-                # 将 QImage 显示在 QLabel 中
-                self.label_video_origin.setPixmap(QPixmap.fromImage(qimg))
+            # 将 QImage 显示在 QLabel 中
+            self.label_video_origin.setPixmap(QPixmap.fromImage(qimg))
 
 
 
@@ -124,99 +124,99 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
 
     def Facial_Expression_Imitation(self) :
 
+        while True:
+            image_flag, image = self.cap.read()
+
+            if image_flag:                         # 如果摄像头成功采集图片, 则执行后续操作
+                masked_image, mask = mask_image(image) # 掩码后的图片，掩码
+                # cv2.imshow("qwer", masked_image)   # cv 显示
+                # cv2.waitKey(1)
+                if self.fp.initialize(masked_image) == True:
+                    # cv2.destroyAllWindows()
+                    break
+
+        try:
+        # if True :
+            count = 0
+            ii = 0
             while True:
-                image_flag, image = self.cap.read()
-
-                if image_flag:                         # 如果摄像头成功采集图片, 则执行后续操作
+                if self.on_off_state :
+                    t1 = time.time()
+                    image_flag, image = self.cap.read()
                     masked_image, mask = mask_image(image) # 掩码后的图片，掩码
-                    # cv2.imshow("qwer", masked_image)   # cv 显示
-                    # cv2.waitKey(1)
-                    if self.fp.initialize(masked_image) == True:
-                        # cv2.destroyAllWindows()
-                        break
+                    if image_flag:                         # 如果摄像头成功采集图片, 则执行后续操作
+                        
+                            self.facemeshdetector.update(masked_image, image_flag)       # 调用关键点检测程序
+                            lm, bs, rm = self.facemeshdetector.get_results()   # 获取关键点检测结果
 
-            try:
-            # if True :
-                count = 0
-                ii = 0
-                while True:
-                    if self.on_off_state :
-                        t1 = time.time()
-                        image_flag, image = self.cap.read()
-                        masked_image, mask = mask_image(image) # 掩码后的图片，掩码
-                        if image_flag:                         # 如果摄像头成功采集图片, 则执行后续操作
-                            
-                                self.facemeshdetector.update(masked_image, image_flag)       # 调用关键点检测程序
-                                lm, bs, rm = self.facemeshdetector.get_results()   # 获取关键点检测结果
+                            # 如果模型推理成功，则滤波、计算头部位姿
+                            if lm is not None and bs is not None and rm is not None:
+                                if self.fp.process_frame(masked_image):
+                                        
+                                    rpy = self.headpose.pose_det(rm=rm)
 
-                                # 如果模型推理成功，则滤波、计算头部位姿
-                                if lm is not None and bs is not None and rm is not None:
-                                    if self.fp.process_frame(masked_image):
-                                         
-                                        rpy = self.headpose.pose_det(rm=rm)
+                                    # self.facemeshdetector.visualize_return()
+                                    # cv2.imshow("Camera", facemeshdetector.visualize_return())               ##### cv2显示人脸
+                                    # cv2.waitKey(1)
+                                    ################################# MMMMMMMMMMMMMMMMMMMMM 显示到界面
+                                    img_detect = self.facemeshdetector.visualize_results(qt_flag=True)
+                                    img_detect = cv2.cvtColor(img_detect, cv2.COLOR_BGR2RGB)
+                                    # # 使用cv2.resize进行降采样     self.label_video_origin.size().width()  361          self.label_video_origin.size().height()
+                                    img_detect = cv2.resize(img_detect, (self.label_video_detect.size().width(),  self.label_video_detect.size().height()), interpolation=cv2.INTER_LINEAR)
 
-                                        # self.facemeshdetector.visualize_return()
-                                        # cv2.imshow("Camera", facemeshdetector.visualize_return())               ##### cv2显示人脸
-                                        # cv2.waitKey(1)
-                                        ################################# MMMMMMMMMMMMMMMMMMMMM 显示到界面
-                                        img_detect = self.facemeshdetector.visualize_results()
-                                        img_detect = cv2.cvtColor(img_detect, cv2.COLOR_BGR2RGB)
-                                        # # 使用cv2.resize进行降采样     self.label_video_origin.size().width()  361          self.label_video_origin.size().height()
-                                        img_detect = cv2.resize(img_detect, (self.label_video_detect.size().width(),  self.label_video_detect.size().height()), interpolation=cv2.INTER_LINEAR)
+                                    # 获取图像大小并创建 QImage
+                                    h, w, ch = img_detect.shape
+                                    bytes_per_line = ch * w         # h,w    (480, 640)
+                                    qimg = QImage(img_detect.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
-                                        # 获取图像大小并创建 QImage
-                                        h, w, ch = img_detect.shape
-                                        bytes_per_line = ch * w         # h,w    (480, 640)
-                                        qimg = QImage(img_detect.data, w, h, bytes_per_line, QImage.Format_RGB888)
+                                    # 将 QImage 显示在 QLabel 中
+                                    self.label_video_detect.setPixmap(QPixmap.fromImage(qimg))
+                                    ################################# WWWWWWWWWWWWWWWWWWWWW
+                                    temp_servos = Servos()
+                                    servos = handle_data(self.servo_flag, bs, rpy, temp_servos)
+                                    if count == 0:
+                                        servos.head_steps(20)
+                                        count += 1
 
-                                        # 将 QImage 显示在 QLabel 中
-                                        self.label_video_detect.setPixmap(QPixmap.fromImage(qimg))
-                                        ################################# WWWWWWWWWWWWWWWWWWWWW
-                                        temp_servos = Servos()
-                                        servos = handle_data(self.servo_flag, bs, rpy, temp_servos)
-                                        if count == 0:
-                                            servos.head_steps(20)
-                                            count += 1
-
-                                        elif count == 1:
-                                            servos.head_steps(1)
-                                        self.servosCtrl.plan_and_pub(servos, self.headCtrl, self.mouthCtrl, cycles=1)
-                                    else:
-                                        count = 0
-                                        # print("move too fast")
-                                        self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\tmove too fast\n')
-                                        self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
-                                        self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl, cycles=1)
-
+                                    elif count == 1:
+                                        servos.head_steps(1)
+                                    self.servosCtrl.plan_and_pub(servos, self.headCtrl, self.mouthCtrl, cycles=1)
                                 else:
                                     count = 0
-                                    # print("head not found")
-                                    self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\thead not found\n')
+                                    # print("move too fast")
+                                    self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\tmove too fast\n')
                                     self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
-                                    self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl,cycles=1)
-                            
-                        t2 = time.time()
-                        print(f"帧率为{1/(t2-t1)}")
-                        # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t'+f"帧率为{1/(t2-t1)}\n")
-                        # self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
+                                    self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl, cycles=1)
+
+                            else:
+                                count = 0
+                                # print("head not found")
+                                self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\thead not found\n')
+                                self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
+                                self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl,cycles=1)
+                        
+                    t2 = time.time()
+                    print(f"帧率为{1/(t2-t1)}")
+                    # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t'+f"帧率为{1/(t2-t1)}\n")
+                    # self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
 
 
-                    else :
-                        print('关闭状态')
-                        # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t关闭状态\n')
-                        # self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
+                else :
+                    print('关闭状态')
+                    # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t关闭状态\n')
+                    # self.textBrowser_msg.verticalScrollBar().setValue(self.textBrowser_msg.verticalScrollBar().maximum())
 
-                        time.sleep(0.08)            # pyqt 发送过快会崩溃
+                    time.sleep(0.08)            # pyqt 发送过快会崩溃
 
-            except Exception as e:
-                print("错误：",e)
-                # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t错误\n')
+        except Exception as e:
+            print("错误：",e)
+            # self.textBrowser_msg.insertPlainText('['+ str(datetime.datetime.now())+']\t错误\n')
 
 
-            finally:
-                self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl,cycles=1)
-                print("----------------end---------------")
-                self.cap.release()
+        finally:
+            self.servosCtrl.plan_and_pub(self.zeroServos,headCtrl=self.headCtrl,mouthCtrl=self.mouthCtrl,cycles=1)
+            print("----------------end---------------")
+            self.cap.release()
     
 
 
