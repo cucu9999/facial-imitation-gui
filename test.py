@@ -135,33 +135,32 @@ if __name__ == '__main__':
             image_flag, image = cap.read()
             masked_image, mask = mask_image(image) # 掩码后的图片，掩码
             if image_flag:                         # 如果摄像头成功采集图片, 则执行后续操作
-                if fp.process_frame(masked_image):
-                    facemeshdetector.update(masked_image, image_flag)       # 调用关键点检测程序
-                    lm, bs, rm = facemeshdetector.get_results()   # 获取关键点检测结果
-
-                    # 如果模型推理成功，则滤波、计算头部位姿
-                    if lm is not None and bs is not None and rm is not None:
+                
+                facemeshdetector.update(masked_image, image_flag)       # 调用关键点检测程序
+                lm, bs, rm = facemeshdetector.get_results()   # 获取关键点检测结果
+                # 如果模型推理成功，则滤波、计算头部位姿
+                if lm is not None and bs is not None and rm is not None:
+                    if fp.process_frame(masked_image):
                         rpy = headpose.pose_det(rm=rm)
-
                         facemeshdetector.visualize_results()
                         temp_servos = Servos()
                         servos = handle_data(servo_flag, bs, rpy, temp_servos)
                         if count == 0:
                             servos.head_steps(20)
                             count += 1
-
                         elif count == 1:
                             servos.head_steps(1)
                         servosCtrl.plan_and_pub(servos, headCtrl, mouthCtrl, cycles=1)
-
                     else:
                         count = 0
-                        print("head not found")
-                        servosCtrl.plan_and_pub(zeroServos,headCtrl=headCtrl,mouthCtrl=mouthCtrl,cycles=1)
+                        print("move too fast")
+                        servosCtrl.plan_and_pub(zeroServos,headCtrl=headCtrl,mouthCtrl=mouthCtrl, cycles=1)
+
                 else:
                     count = 0
-                    print("move too fast")
-                    servosCtrl.plan_and_pub(zeroServos,headCtrl=headCtrl,mouthCtrl=mouthCtrl, cycles=1)
+                    print("head not found")
+                    servosCtrl.plan_and_pub(zeroServos,headCtrl=headCtrl,mouthCtrl=mouthCtrl,cycles=1)
+                
             t2 = time.time()
 
     except Exception as e:
