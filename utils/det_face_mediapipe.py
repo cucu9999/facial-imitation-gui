@@ -1,16 +1,3 @@
-'''
-import cv2
-import mediapipe as mp
-from mediapipe.framework.formats import landmark_pb2
-from mediapipe.tasks import python as mp_python
-import time
-import numpy as np
-from scipy.spatial.transform import Rotation
-import matplotlib.pyplot as plt
-import sys
-'''
-
-# STEP 1: Import the necessary modules.
 import mediapipe as mp
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
@@ -21,6 +8,8 @@ from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision
 import cv2
 import os 
+
+from scipy.spatial.transform import Rotation
 
 script_dir = os.path.dirname(__file__)
 MP_TASK_FILE = os.path.join(script_dir, 'face_landmarker_v2_with_blendshapes.task')
@@ -92,25 +81,6 @@ class FaceMeshDetector:
         cv2.waitKey(0)
 
 
-# ==========================================================================
-# 根据关键点坐标，检测人脸位姿
-# ==========================================================================
-class HeadPose:
-    def __init__(self):
-        self.yao = 0
-        self.bai = 0
-        self.dian = 0
-
-    def pose_det(self, rm):
-        r = Rotation.from_matrix(rm[:3, :3])
-        result = r.as_euler('xyz', degrees=True)
-
-        # 根据欧拉角设置仿真人头姿态变量值
-        self.dian = -result[0]
-        self.yao = -result[1]
-        self.bai = -result[2]
-
-        return [self.dian, self.yao, self.bai]
 
 if __name__ == "__main__":
     

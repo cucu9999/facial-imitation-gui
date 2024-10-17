@@ -1,5 +1,4 @@
 from serial import *
-import platform
 import time
 
 # TODO: 从xml文件直接读取配置
@@ -21,7 +20,7 @@ left_eye_level      = Servo( 1, 90, 112, 68, 11.1, 0, 0, -1)  # 左眼 内 [68-9
 # left_eye_erect      = Servo( 0, 90, 117, 63, 11.1, 0, 0, 1)  # 左眼 上 [63-90-117] 下   0.5
 # left_eye_level      = Servo( 1, 90, 112, 68, 11.1, 0, 0, 1)  # 左眼 内 [68-90-112] 外   0.5
 
-left_eyebrow_erect  = Servo(12, 90,  90, 45, 11.1, 0, 0, -1)  # 左眉 上 [45-90-90]  -    1.0   # 周老师机器人反了，实际应该是-1
+left_eyebrow_erect  = Servo(12, 90,  90, 45, 11.1, 0, 0, -1)  # 左眉 上 [45-90-90]  -    1.0
 left_eyebrow_level  = Servo(13, 90, 160, 90, 11.1, 0, 0, 1)   # 左眉 -  [90-90-160] 皱   0.0
 
 right_blink         = Servo( 5, 90, 126, 45, 11.1, 0, 0, 1)  # 右眨 闭 [45-90-126] 张    0.56
@@ -32,9 +31,9 @@ right_eye_level     = Servo( 9, 90, 112, 68, 11.1, 0, 0, -1) # 右眼 外 [68-90
 
 
 right_eyebrow_erect = Servo( 7, 90, 135, 90, 11.1, 0, 0, 1)  # 右眉 -  [90-90-135] 上
-right_eyebrow_level = Servo( 6, 90,  90, 27, 11.1, 0, 0, -1)  # 右眉 皱 [27-90- 90] -
+right_eyebrow_level = Servo( 6, 90,  90, 27, 11.1, 0, 0, 1)  # 右眉 皱 [27-90- 90] -
 
-head_dian           = Servo(10, 90, 126, 50, 11.1, 0, 0, 1)  # 点头 点 [50-90-126] 抬 0.51
+head_dian           = Servo(10, 90, 126, 50, 11.1, 0, 0, 1)  # 点头 点 [50-90-126] 抬  0.51
 head_yao            = Servo(11, 90, 180,  0, 11.1, 0, 0, -1) # 摇头 右 [0-90-180] 左
 head_bai            = Servo( 2, 90, 180,  0, 11.1, 0, 0, -1) # 摆头 右 [0-90-180] 左
 
@@ -64,7 +63,7 @@ class HeadCtrl(Serial):
         self.right_eye_erect     = 0.5
         self.right_eye_level     = 0.5
         self.right_eyebrow_erect = 0.01
-        self.right_eyebrow_level = 0.01
+        self.right_eyebrow_level = 0.99
 
         self.head_dian           = 0.53
         self.head_yao            = 0.5
@@ -77,6 +76,23 @@ class HeadCtrl(Serial):
             self.right_blink, self.right_eye_erect, self.right_eye_level, self.right_eyebrow_erect, self.right_eyebrow_level,
             self.head_dian, self.head_yao, self.head_bai
         ]
+    
+    def setmsg(self, data):
+        self.left_blink          = data[0]
+        self.left_eye_erect      = data[1]
+        self.left_eye_level      = data[2]
+        self.left_eyebrow_erect  = data[3]
+        self.left_eyebrow_level  = data[4]
+
+        self.right_blink         = data[5]
+        self.right_eye_erect     = data[6]
+        self.right_eye_level     = data[7]
+        self.right_eyebrow_erect = data[8]
+        self.right_eyebrow_level = data[9]
+
+        self.head_dian           = data[10]
+        self.head_yao            = data[11]
+        self.head_bai            = data[12]
 
     def send(self):
         # print(self.msgs)
@@ -94,18 +110,18 @@ class HeadCtrl(Serial):
             # node = servo.jdMin + node*(servo.jdMax-servo.jdMin) 
             servo_init = {1:servo.jdMin, -1:servo.jdMax}
             node = servo_init[servo.norm] + node*(servo.jdMax - servo.jdMin) * servo.norm
-            target_pos = node
-            if node and target_pos != servo.pos: # 目标位置改变
-                if target_pos != 0: # msg 没有值
+
+            if node and node != servo.pos: # 目标位置改变
+                if node != 0: # msg 没有值
                     # 限幅
-                    if target_pos > servo.jdMax:
-                        target_pos = servo.jdMax
-                    if target_pos < servo.jdMin:
-                        target_pos = servo.jdMin
-                    servo.pos = target_pos
-                    target_pos = int((target_pos + servo.fOffSet) * servo.fScale)
-                    pos_l = target_pos & 0xFF
-                    pos_h = (target_pos >> 8) & 0x07
+                    if node > servo.jdMax:
+                        node = servo.jdMax
+                    if node < servo.jdMin:
+                        node = servo.jdMin
+                    servo.pos = node
+                    node = int((node + servo.fOffSet) * servo.fScale)
+                    pos_l = node & 0xFF
+                    pos_h = (node >> 8) & 0x07
                     pos_h = pos_h | (servo.id<<3)
                     # print(servo.id)
                     # print(pos_h,pos_l)
@@ -130,18 +146,7 @@ class HeadCtrl(Serial):
 #直接执行这个.py文件运行下边代码，import到其他脚本中下边代码不会执行
 if __name__ == '__main__':
 
-    os_type = platform.system()
-    
-    if os_type == "Linux":
-        port_head = '/dev/ttyACM1'
-    elif os_type == "Darwin":
-        port_head = ""
-    elif os_type == "Windows":
-        port_head = 'COM7'
-    else:
-        print("Unsupported OS, Please check your PC system")
-
-    ctrl = HeadCtrl(port_head)
+    ctrl = HeadCtrl('/dev/ttyACM1')
 
     ctrl.left_blink          = 0.47  #  0.47
     ctrl.left_eye_erect      = 0.5   #  0.5
@@ -153,11 +158,12 @@ if __name__ == '__main__':
     ctrl.right_eye_erect     = 0.5   #  0.5
     ctrl.right_eye_level     = 0.5   #  0.5
     ctrl.right_eyebrow_erect = 0.01  #  0.01
-    ctrl.right_eyebrow_level = 0.01  #  0.01
+    ctrl.right_eyebrow_level = 0.99  #  0.99
 
     ctrl.head_dian           = 0.53  #  0.51
     ctrl.head_yao            = 0.5   #  0.5
     ctrl.head_bai            = 0.5   #  0.5
 
-    print(f"已发布头部舵机指令：{ctrl.msgs}")
+    print(ctrl.msgs)
     ctrl.send()
+    print(ctrl.msgs)
