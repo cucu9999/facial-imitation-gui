@@ -29,7 +29,7 @@ class ServoControlApp:
 
         row = 0
         for servo, var in self.servo_values.items():
-            Scale(master, from_=0, to=1, orient=HORIZONTAL, resolution=0.01, label=servo, variable=var,
+            Scale(master, from_=0, to=1, orient=HORIZONTAL, resolution=0.01, length=300，label=servo, variable=var,
                   command=self.update_servo).grid(row=row, column=0, sticky="ew")
             row += 1
 
@@ -66,5 +66,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = ServoControlApp(root)
 
-    
+
     root.mainloop()
